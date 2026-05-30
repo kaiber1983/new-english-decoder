@@ -1,12 +1,45 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { rankedWords, type BoardRange, loadSocialWords } from "@/lib/socialWords";
+import { useEffect, useMemo, useState } from "react";
+import {
+  rankedWords,
+  seedSocialWords,
+  type BoardRange,
+  type SocialWord,
+} from "@/lib/socialWords";
 
 export function Leaderboard() {
   const [range, setRange] = useState<BoardRange>("week");
-  const [words] = useState(() => loadSocialWords());
+  const [words, setWords] = useState<SocialWord[]>(seedSocialWords);
   const ranked = useMemo(() => rankedWords(words, range), [range, words]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadBoard() {
+      try {
+        const response = await fetch(`/api/social-words?range=${range}`);
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = (await response.json()) as { words?: SocialWord[] };
+
+        if (!ignore && data.words) {
+          setWords(data.words);
+        }
+      } catch {
+        // Keep seed words visible if the API is unavailable.
+      }
+    }
+
+    void loadBoard();
+
+    return () => {
+      ignore = true;
+    };
+  }, [range]);
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">

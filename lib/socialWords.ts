@@ -76,12 +76,18 @@ export function createSocialWord(word: string, meaning: string): SocialWord {
   };
 }
 
-export function challengeUrl(word: string, meaning: string) {
+export function challengeUrl(word: string, meaning: string, id?: string) {
   const base = typeof window === "undefined" ? "" : window.location.origin;
-
-  return `${base}/challenge?word=${encodeURIComponent(word)}&meaning=${encodeURIComponent(
+  const params = new URLSearchParams({
+    word,
     meaning,
-  )}`;
+  });
+
+  if (id) {
+    params.set("id", id);
+  }
+
+  return `${base}/challenge?${params.toString()}`;
 }
 
 export function inBoardRange(word: SocialWord, range: BoardRange) {

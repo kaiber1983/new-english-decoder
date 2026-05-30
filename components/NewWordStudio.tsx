@@ -8,6 +8,7 @@ import {
   createSocialWord,
   loadSocialWords,
   saveSocialWords,
+  type SocialWord,
 } from "@/lib/socialWords";
 import { SocialShareBar } from "./SocialShareBar";
 
@@ -25,20 +26,48 @@ export function NewWordStudio() {
   const [pieces, setPieces] = useState("");
   const [builtWord, setBuiltWord] = useState("");
   const [builtMeaning, setBuiltMeaning] = useState("");
+  const [builtId, setBuiltId] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
   const preview = useMemo(() => cleanPieces(pieces), [pieces]);
-  const url = builtWord ? challengeUrl(builtWord, builtMeaning) : "";
+  const url = builtWord ? challengeUrl(builtWord, builtMeaning, builtId) : "";
 
-  function createChallenge() {
+  async function createChallenge() {
     const cleanMeaning = meaning.trim();
 
     if (!preview || !cleanMeaning) {
       return;
     }
 
-    const nextWord = createSocialWord(preview, cleanMeaning);
-    const nextWords = [nextWord, ...loadSocialWords()];
-    saveSocialWords(nextWords);
+    setIsCreating(true);
+    let nextWord: SocialWord;
+
+    try {
+      const response = await fetch("/api/social-words", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          word: preview,
+          meaning: cleanMeaning,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not create word.");
+      }
+
+      nextWord = (await response.json()) as SocialWord;
+    } catch {
+      nextWord = createSocialWord(preview, cleanMeaning);
+      const nextWords = [nextWord, ...loadSocialWords()];
+      saveSocialWords(nextWords);
+    } finally {
+      setIsCreating(false);
+    }
+
+    setBuiltId(nextWord.id);
     setBuiltWord(nextWord.word);
     setBuiltMeaning(nextWord.meaning);
   }
@@ -91,12 +120,12 @@ export function NewWordStudio() {
 
         <button
           className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-lg bg-lime-300 px-5 font-semibold text-stone-950 transition hover:bg-lime-200 disabled:cursor-not-allowed disabled:bg-stone-700 disabled:text-stone-400"
-          disabled={!preview || !meaning.trim()}
+          disabled={!preview || !meaning.trim() || isCreating}
           onClick={createChallenge}
           type="button"
         >
           <Sparkles aria-hidden="true" className="size-5" />
-          Create share challenge
+          {isCreating ? "Creating..." : "Create share challenge"}
         </button>
         {builtWord ? (
         <section className="mt-6 rounded-lg border border-lime-300 bg-lime-50 p-5 text-stone-950">

@@ -8,6 +8,7 @@ import {
   loadSocialWords,
   saveSocialWords,
   slugifySocialWord,
+  type SocialWord,
 } from "@/lib/socialWords";
 
 function getSharedChallenge() {
@@ -20,6 +21,7 @@ function getSharedChallenge() {
 
   const params = new URLSearchParams(window.location.search);
   return {
+    id: params.get("id") ?? "",
     word: params.get("word") ?? "sky worry",
     meaning: params.get("meaning") ?? "fear before flying",
   };
@@ -33,7 +35,23 @@ export function ChallengeGuess() {
   const [likes, setLikes] = useState(0);
   const [revealed, setRevealed] = useState(false);
 
-  function likeWord() {
+  async function likeWord() {
+    if (shared.id) {
+      try {
+        const response = await fetch(`/api/social-words/${shared.id}/like`, {
+          method: "POST",
+        });
+
+        if (response.ok) {
+          const updated = (await response.json()) as SocialWord;
+          setLikes(updated.likes);
+          return;
+        }
+      } catch {
+        // Fall back to local demo storage.
+      }
+    }
+
     const loaded = loadSocialWords();
     const idStart = slugifySocialWord(shared.word);
     const existing = loaded.find((item) => item.word === shared.word);
@@ -46,11 +64,32 @@ export function ChallengeGuess() {
     setLikes((current) => current + 1);
   }
 
-  function postComment() {
+  async function postComment() {
     const cleanComment = comment.trim();
 
     if (!cleanComment) {
       return;
+    }
+
+    if (shared.id) {
+      try {
+        const response = await fetch(`/api/social-words/${shared.id}/comments`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ comment: cleanComment }),
+        });
+
+        if (response.ok) {
+          const updated = (await response.json()) as SocialWord;
+          setComments(updated.comments);
+          setComment("");
+          return;
+        }
+      } catch {
+        // Fall back to in-page comments.
+      }
     }
 
     setComments((current) => [cleanComment, ...current]);
