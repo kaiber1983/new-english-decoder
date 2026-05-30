@@ -79,7 +79,7 @@ export function ChallengeGuess() {
             value={guess}
           />
         </label>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 grid gap-2 md:flex md:flex-wrap">
           <button
             className="min-h-11 rounded-lg bg-stone-950 px-4 font-semibold text-white hover:bg-lime-700"
             onClick={() => setRevealed(true)}

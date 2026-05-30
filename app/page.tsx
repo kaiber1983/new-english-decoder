@@ -15,12 +15,21 @@ export default function Home() {
               <WandSparkles aria-hidden="true" className="size-4 text-lime-600" />
               Free forever. Built to spread.
             </div>
-            <h1 className="font-display max-w-4xl text-5xl font-black leading-[0.98] text-stone-950 sm:text-7xl lg:text-8xl">
-              Refactor English into words people can see.
+            <h1 className="font-display max-w-4xl text-[2rem] font-black leading-[0.98] text-stone-950 min-[430px]:text-5xl sm:text-7xl lg:text-8xl">
+              <span className="block sm:inline">Refactor </span>
+              <span className="block sm:inline">English </span>
+              <span className="block sm:inline">into words </span>
+              <span className="block sm:inline">people </span>
+              <span className="block sm:inline">can see.</span>
             </h1>
-            <p className="mt-6 max-w-2xl text-xl leading-8 text-stone-700 sm:text-2xl sm:leading-9">
-              New English turns hidden expert words into visible meaning, then lets
-              friends guess, like, and share the best inventions.
+            <p className="mt-6 max-w-2xl text-base leading-7 text-stone-700 sm:text-2xl sm:leading-9">
+              <span className="block sm:inline">
+                New English turns hidden expert words
+              </span>{" "}
+              <span className="block sm:inline">into visible meaning.</span>{" "}
+              <span className="block sm:inline">
+                Friends guess, like, and share the best inventions.
+              </span>
             </p>
             <div className="mt-8 flex flex-wrap gap-3 sm:mt-10">
               <Link
